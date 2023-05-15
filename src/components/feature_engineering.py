@@ -1,34 +1,44 @@
 import sys
+import re
 import pandas as pd
+import joblib
+import numpy as np
+from nltk import word_tokenize
+from nltk.stem import PorterStemmer
+from nltk.corpus import stopwords
+from sklearn.feature_extraction.text import TfidfVectorizer
 from src.logger import logging
 from src.exception import CustomException
-from nltk.tokenize import word_tokenize
-from sklearn.feature_extraction.text import TfidfVectorizer
+
 
 
 
 class FeatureEngineering:
-    def __init__(self, data_df):
-        self.data_df = data_df
+    def __init__(self):
         self.logger = logging
-    
-    def tokenize_text(self):
-        """
-        Tokenize the text data.
-        """
-        tokenized_texts = []
-        
+                        
+    def stopwords_removal(self,df):
         try:
+            # Tokenizing the words
+            stop_words = set(stopwords.words('english'))
             tokenized_texts = []
-            for text in self.data_df['text']:
+            for text in df['Text']:
                 tokens = word_tokenize(text)
                 tokenized_texts.append(tokens)
-            return tokenized_texts    
-        
+            # Remove stop words
+            texts = [] 
+            for text in tokenized_texts:
+                words= []
+                for word in text:
+                    if word not in stop_words:
+                       words.append(word)
+                texts.append(words)
+            return texts
         except Exception as e:
             self.logger.info(e)
             raise CustomException(e, sys)
-        
+            
+
     def vectorize_text(self,tokenized_texts):
         """
         Vectorize the tokenized texts using TF-IDF.
